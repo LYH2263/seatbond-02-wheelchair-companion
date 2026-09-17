@@ -9,6 +9,7 @@ type Hold = {
   start_col: number;
   end_col: number;
   party_size: number;
+  kind: string;
 };
 
 export default function HoldPage() {
@@ -16,6 +17,7 @@ export default function HoldPage() {
   const [sid, setSid] = useState<number | "">("");
   const [party, setParty] = useState(3);
   const [prefRow, setPrefRow] = useState("");
+  const [wheel, setWheel] = useState(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [last, setLast] = useState<Hold | null>(null);
@@ -31,11 +33,19 @@ export default function HoldPage() {
     setMsg("");
     setErr("");
     try {
-      const body: Record<string, unknown> = { showtime_id: sid, party_size: party };
-      if (prefRow) body.preferred_row = Number(prefRow);
+      const body: Record<string, unknown> = {
+        showtime_id: sid,
+        party_size: wheel ? 2 : party,
+        wheelchair_need: wheel,
+      };
+      if (!wheel && prefRow) body.preferred_row = Number(prefRow);
       const hold = await api<Hold>("/holds", { method: "POST", body: JSON.stringify(body) });
       setLast(hold);
-      setMsg(`已锁座 ${hold.order_code}：第${hold.row}排 ${hold.start_col}-${hold.end_col}`);
+      setMsg(
+        hold.kind === "wheelchair"
+          ? `已锁轮椅组合 ${hold.order_code}：第${hold.row}排 ${hold.start_col}-${hold.end_col}（轮椅位+陪同位）`
+          : `已锁座 ${hold.order_code}：第${hold.row}排 ${hold.start_col}-${hold.end_col}`
+      );
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     }
@@ -58,7 +68,8 @@ export default function HoldPage() {
             type="number"
             min={1}
             max={12}
-            value={party}
+            value={wheel ? 2 : party}
+            disabled={wheel}
             onChange={(e) => setParty(Number(e.target.value))}
             style={{ width: 72 }}
           />
@@ -69,16 +80,25 @@ export default function HoldPage() {
             value={prefRow}
             onChange={(e) => setPrefRow(e.target.value)}
             placeholder="可选"
+            disabled={wheel}
             style={{ width: 72 }}
           />
         </label>
-        <button onClick={submit}>查找并锁连座</button>
+        <label className="wheel-toggle">
+          <input type="checkbox" checked={wheel} onChange={(e) => setWheel(e.target.checked)} />{" "}
+          轮椅需求
+        </label>
+        <button onClick={submit}>{wheel ? "锁轮椅组合" : "查找并锁连座"}</button>
       </div>
+      {wheel && (
+        <p className="hint">轮椅需求将锁定完整组合：轮椅位 + 同排相邻陪同位，人数按组合座位数计为 2。</p>
+      )}
       {msg && <div className="ok">{msg}</div>}
       {err && <div className="err">{err}</div>}
       {last && (
         <p className="mono">
           订单 {last.order_code} · {last.party_size} 人 · R{last.row} C{last.start_col}-{last.end_col}
+          {last.kind === "wheelchair" && " · ♿ 轮椅组合"}
         </p>
       )}
     </>

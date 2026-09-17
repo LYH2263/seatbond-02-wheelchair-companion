@@ -19,6 +19,7 @@ type Hold = {
   end_col: number;
   party_size: number;
   status: string;
+  kind: string;
 };
 
 export default function Layout() {
@@ -81,11 +82,17 @@ export default function Layout() {
           {active.length === 0 && <p className="stub-empty">暂无持票</p>}
           {active.map((h) => (
             <div key={h.id} className="stub-ticket">
-              <div className="stub-code">{h.order_code}</div>
+              <div className="stub-code">
+                {h.kind === "wheelchair" && "♿ "}
+                {h.order_code}
+              </div>
               <div className="stub-meta">
                 R{h.row} · C{h.start_col}-{h.end_col}
               </div>
-              <div className="stub-meta">{h.party_size} 人 · {h.status}</div>
+              <div className="stub-meta">
+                {h.party_size} 人 · {h.kind === "wheelchair" ? "轮椅组合 · " : ""}
+                {h.status}
+              </div>
             </div>
           ))}
         </div>

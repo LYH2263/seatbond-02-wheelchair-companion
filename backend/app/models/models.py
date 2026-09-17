@@ -14,6 +14,22 @@ class Hall(Base):
     cols: Mapped[int] = mapped_column(Integer)
     aisle_cols: Mapped[str] = mapped_column(String(80), default="")  # comma-separated
     showtimes: Mapped[list["Showtime"]] = relationship(back_populates="hall")
+    wheelchair_pairs: Mapped[list["WheelchairPair"]] = relationship(
+        back_populates="hall", cascade="all, delete-orphan"
+    )
+
+
+class WheelchairPair(Base):
+    """A wheelchair seat plus its mandatory same-row adjacent companion seat."""
+
+    __tablename__ = "wheelchair_pairs"
+    __table_args__ = (UniqueConstraint("hall_id", "row", "col", name="uq_wheelchair_seat"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    hall_id: Mapped[int] = mapped_column(ForeignKey("halls.id"))
+    row: Mapped[int] = mapped_column(Integer)
+    col: Mapped[int] = mapped_column(Integer)  # wheelchair seat
+    companion_col: Mapped[int] = mapped_column(Integer)  # adjacent companion seat
+    hall: Mapped[Hall] = relationship(back_populates="wheelchair_pairs")
 
 
 class Showtime(Base):
@@ -37,6 +53,7 @@ class SeatHold(Base):
     end_col: Mapped[int] = mapped_column(Integer)
     party_size: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(20), default="held")
+    kind: Mapped[str] = mapped_column(String(20), default="normal")  # normal | wheelchair
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     showtime: Mapped[Showtime] = relationship(back_populates="holds")
 
