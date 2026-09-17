@@ -276,3 +276,47 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   box-shadow: inset 0 -3px 0 #a83828, 0 0 8px rgba(232, 93, 76, .35);
 }
 .seat.aisle { background: var(--aisle); opacity: .3; }
+
+/* —— wheelchair spot vs companion seat: two distinct looks —— */
+.seat.wheel {
+  background: linear-gradient(180deg, #2f8f7a, #1d6657);
+  box-shadow: inset 0 -3px 0 #11463b, inset 0 0 0 1px rgba(120, 240, 210, .55);
+  color: #d8fff2;
+}
+.seat.comp {
+  background: linear-gradient(180deg, #6b4aa0, #4a2f78);
+  box-shadow: inset 0 -3px 0 #321e54, inset 0 0 0 1px rgba(200, 170, 255, .55);
+  color: #efe4ff;
+}
+/* occupied wheelchair combo keeps the hot fill but gets a gold frame */
+.seat.occ.wheel,
+.seat.occ.comp {
+  background: var(--hot);
+  box-shadow: inset 0 0 0 2px var(--cinema-gold), 0 0 10px rgba(232, 196, 106, .45);
+  color: #1a1208;
+}
+.seat-legend {
+  display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
+  margin: 0 0 .75rem; font-size: .75rem; color: var(--cinema-muted);
+}
+.seat-legend .chip {
+  width: 16px; height: 14px; border-radius: 3px 3px 5px 5px;
+  display: inline-block; margin-right: .3rem; vertical-align: -2px;
+}
+.chip.chip-free { background: var(--free); }
+.chip.chip-occ { background: var(--hot); }
+.chip.chip-wheel { background: #2f8f7a; box-shadow: inset 0 0 0 1px rgba(120,240,210,.55); }
+.chip.chip-comp { background: #6b4aa0; box-shadow: inset 0 0 0 1px rgba(200,170,255,.55); }
+
+.tag {
+  display: inline-block; padding: .05rem .4rem; border-radius: 3px;
+  font-size: .7rem; font-weight: 700; letter-spacing: .05em;
+}
+.tag-wheel {
+  background: rgba(47, 143, 122, .25); color: #6fe0c4;
+  border: 1px solid rgba(120, 240, 210, .4);
+}
+.tag-regular {
+  background: rgba(31, 58, 95, .35); color: #9db8e0;
+  border: 1px solid #33507a;
+}

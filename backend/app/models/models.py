@@ -14,6 +14,31 @@ class Hall(Base):
     cols: Mapped[int] = mapped_column(Integer)
     aisle_cols: Mapped[str] = mapped_column(String(80), default="")  # comma-separated
     showtimes: Mapped[list["Showtime"]] = relationship(back_populates="hall")
+    wheelchair_pairs: Mapped[list["WheelchairPair"]] = relationship(
+        back_populates="hall", cascade="all, delete-orphan"
+    )
+
+
+class WheelchairPair(Base):
+    """A wheelchair spot bound to one mandatory companion seat in the same row.
+
+    The companion must be the immediate left/right neighbour and may not sit
+    across an aisle. Until a wheelchair hold takes the whole pair, the
+    companion is protected: ordinary contiguous search treats it as blocked.
+    """
+
+    __tablename__ = "wheelchair_pairs"
+    __table_args__ = (
+        UniqueConstraint("hall_id", "wheel_row", "wheel_col", name="uq_wheelchair_cell"),
+        UniqueConstraint("hall_id", "companion_row", "companion_col", name="uq_companion_cell"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    hall_id: Mapped[int] = mapped_column(ForeignKey("halls.id"))
+    wheel_row: Mapped[int] = mapped_column(Integer)
+    wheel_col: Mapped[int] = mapped_column(Integer)
+    companion_row: Mapped[int] = mapped_column(Integer)
+    companion_col: Mapped[int] = mapped_column(Integer)
+    hall: Mapped[Hall] = relationship(back_populates="wheelchair_pairs")
 
 
 class Showtime(Base):
@@ -37,6 +62,8 @@ class SeatHold(Base):
     end_col: Mapped[int] = mapped_column(Integer)
     party_size: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(20), default="held")
+    hold_type: Mapped[str] = mapped_column(String(20), default="regular")
+    pair_id: Mapped[int | None] = mapped_column(ForeignKey("wheelchair_pairs.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     showtime: Mapped[Showtime] = relationship(back_populates="holds")
 

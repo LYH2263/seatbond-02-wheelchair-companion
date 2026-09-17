@@ -19,6 +19,8 @@ type Hold = {
   end_col: number;
   party_size: number;
   status: string;
+  hold_type?: string;
+  pair_id?: number | null;
 };
 
 export default function Layout() {
@@ -85,7 +87,10 @@ export default function Layout() {
               <div className="stub-meta">
                 R{h.row} · C{h.start_col}-{h.end_col}
               </div>
-              <div className="stub-meta">{h.party_size} 人 · {h.status}</div>
+              <div className="stub-meta">
+                {h.party_size} 人 · {h.status}
+                {h.hold_type === "wheelchair" && " · 轮椅组合"}
+              </div>
             </div>
           ))}
         </div>
